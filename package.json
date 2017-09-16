@@ -1,0 +1,26 @@
+{
+	"name": "brunch-elm",
+	"version": "0.1.0",
+	"description": "Brunch Elm",
+	"main": "brunch-config.js",
+	"scripts": {
+		"postinstall": "elm package install -y",
+		"start": "brunch watch --server",
+		"prod": "brunch build --production"
+	},
+	"keywords": [
+		"elm",
+		"brunch",
+		"sass"
+	],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {},
+	"devDependencies": {
+		"brunch": "^2.10.9",
+		"auto-reload-brunch": "^2.7.1",
+		"hmr-brunch": "^0.1.1",
+		"elm-brunch": "^0.8.0", 
+		"sass-brunch": "^2.10.0"
+	}
+}
