@@ -3,8 +3,9 @@ module Main exposing (main)
 import Html exposing (Html)
 import Http
 import Element exposing (..)
-import Element.Attributes exposing (..)
 import Element.Input as Input
+import Element.Attributes exposing (..)
+import Element.Events exposing (onClick)
 import Style exposing (..)
 import Style.Color as Color
 import Style.Font as Font
@@ -131,7 +132,15 @@ update msg ({ filters } as model) =
                     ! []
 
         SelectCategory category ->
-            model ! []
+            let
+                filters_ =
+                    { filters | category = category }
+            in
+                { model
+                    | filters = filters_
+                    , displayRecords = filterRecords filters_ model.allRecords
+                }
+                    ! []
 
         UpdateSearch search ->
             let
@@ -177,24 +186,27 @@ filterRecords filters records =
 type Styles
     = None
     | Page
+    | Header
     | SideContainer
-    | SideItems
+    | CategorySelect
+    | SideList
     | SideItem
     | ContentContainer
     | ContentSummary
-    | ContentItems
+    | ContentList
     | ContentItem
     | ChapterNumber
-    | Header
-    | Category
-    | Selected
+
+
+type Variations
+    = Selected
 
 
 
 --http://www.colourlovers.com/palette/85232/Starry_Night
 
 
-stylesheet : StyleSheet Styles variation
+stylesheet : StyleSheet Styles Variations
 stylesheet =
     Style.styleSheet
         [ style Page
@@ -203,17 +215,34 @@ stylesheet =
             , Font.typeface [ Font.font "Open Sans", Font.font "sans-serif" ]
             , Font.size 18
             ]
+        , style Header
+            [ Color.background (rgb 24 24 72)
+            , Font.typeface [ Font.font "Shadows Into Light", Font.font "cursive" ]
+            , Font.size 30
+            , Font.lineHeight 1
+            ]
         , style SideContainer
             [ Color.background (rgb 120 144 168)
             , Color.text white
             ]
+        , style CategorySelect
+            [ Border.none
+            , Color.background (rgb 255 255 255)
+            , variation Selected
+                [ Color.background (rgb 240 168 24)
+                ]
+            ]
+        , style SideList
+            []
+        , style SideItem
+            []
         , style ContentContainer
             [ Color.background (rgb 48 72 120)
             , Color.text white
             ]
         , style ContentSummary
             []
-        , style ContentItems
+        , style ContentList
             []
         , style ContentItem
             []
@@ -221,15 +250,6 @@ stylesheet =
             [ Border.right 1
             , Color.border white
             , Font.alignRight
-            ]
-        , style Header
-            [ Color.background (rgb 24 24 72)
-            , Font.typeface [ Font.font "Shadows Into Light", Font.font "cursive" ]
-            , Font.size 30
-            , Font.lineHeight 1
-            ]
-        , style Selected
-            [ Color.background (rgb 240 168 24)
             ]
         ]
 
@@ -255,21 +275,15 @@ side model =
         [ width (px 400)
         , spacing 10
         ]
-        [ el Header
-            [ paddingXY 20 10 ]
-            (text "the Savage Codex")
-          --, hairline Selected
-        , pageFilter model.filters
-          --, hairline Selected
+        [ el Header [ paddingXY 20 10 ] (text "the Savage Codex")
+        , pageFilters model.filters
         , categoryFilter model.filters
-          --, hairline Selected
         , searchFilter model.filters
-          --, hairline Selected
         , itemList model.displayRecords
         ]
 
 
-pageFilter filters =
+pageFilters filters =
     row None
         [ spread
         , paddingXY 10 0
@@ -297,12 +311,26 @@ categoryFilter filters =
     row None
         [ alignLeft
         , paddingXY 10 0
-        , spacing 10
+          --, spacing 10
         ]
-        [ el Selected [ padding 10 ] (text "Characters")
-        , el Selected [ padding 10 ] (text "Powers")
-        , el Selected [ padding 10 ] (text "Factions")
-        , el Selected [ padding 10 ] (text "World")
+        [ button CategorySelect
+            [ padding 10
+            , vary Selected (filters.category == Data.Character)
+            , onClick (SelectCategory Data.Character)
+            ]
+            (text "Characters")
+        , button CategorySelect
+            [ padding 10
+            , vary Selected (filters.category == Data.Power)
+            , onClick (SelectCategory Data.Power)
+            ]
+            (text "Powers")
+        , button CategorySelect
+            [ padding 10
+            , vary Selected (filters.category == Data.World)
+            , onClick (SelectCategory Data.World)
+            ]
+            (text "World")
         ]
 
 
@@ -340,40 +368,39 @@ itemList records =
 
 
 content model =
-    column ContentContainer
-        [ width fill
-        , minWidth (px 400)
-        ]
-        [ el Header
-            [ paddingXY 20 10 ]
-            (text "Nothing here yet")
-        , el ContentSummary
-            [ paddingXY 20 10 ]
-            (text "No Summary")
-        , contentItems
-        ]
+    let
+        contentList =
+            column ContentList
+                []
+                [ contentItem "one"
+                , contentItem "two"
+                , contentItem "three"
+                , contentItem "four"
+                ]
 
-
-contentItems =
-    column ContentItems
-        []
-        [ contentItem "one"
-        , contentItem "two"
-        , contentItem "three"
-        , contentItem "four"
-        ]
-
-
-contentItem i =
-    row ContentItem
-        [ paddingXY 20 5
-        , spacing 10
-        , alignLeft
-        ]
-        [ el ChapterNumber
-            [ width (px 60)
-            , paddingRight 10
+        contentItem i =
+            row ContentItem
+                [ paddingXY 20 5
+                , spacing 10
+                , alignLeft
+                ]
+                [ el ChapterNumber
+                    [ width (px 60)
+                    , paddingRight 10
+                    ]
+                    (text "999")
+                , el None [] (text i)
+                ]
+    in
+        column ContentContainer
+            [ width fill
+            , minWidth (px 400)
             ]
-            (text "999")
-        , el None [] (text i)
-        ]
+            [ el Header
+                [ paddingXY 20 10 ]
+                (text "Nothing here yet")
+            , el ContentSummary
+                [ paddingXY 20 10 ]
+                (text "No Summary")
+            , contentList
+            ]
