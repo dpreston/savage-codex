@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Html exposing (Html)
+import Http
 import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Input as Input
@@ -9,6 +10,7 @@ import Style.Color as Color
 import Style.Font as Font
 import Style.Border as Border
 import Color exposing (..)
+import Simple.Fuzzy as Fuzzy
 
 
 --
@@ -49,34 +51,8 @@ type alias Filters =
 
 model : Model
 model =
-    { allRecords =
-        [ { id = 1
-          , category = Data.Character
-          , title = "Rayne"
-          , firstPage = 1
-          , entries = []
-          }
-        , { id = 2
-          , category = Data.Character
-          , title = "Sumila"
-          , firstPage = 1
-          , entries = []
-          }
-        ]
-    , displayRecords =
-        [ { id = 1
-          , category = Data.Character
-          , title = "Rayne"
-          , firstPage = 1
-          , entries = []
-          }
-        , { id = 2
-          , category = Data.Character
-          , title = "Sumila"
-          , firstPage = 1
-          , entries = []
-          }
-        ]
+    { allRecords = []
+    , displayRecords = []
     , currentRecord = Nothing
     , filters =
         { limitPage = 1
@@ -98,7 +74,7 @@ model =
 
 init : ( Model, Cmd Msg )
 init =
-    model ! []
+    model ! [ fetchDataCmd ]
 
 
 
@@ -107,6 +83,7 @@ init =
 
 type Msg
     = NoOp
+    | FetchDataCompleted (Result Http.Error Data.JsonRoot)
     | UpdatePage String
     | SelectCategory Data.Category
     | UpdateSearch String
@@ -114,10 +91,28 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ filters } as model) =
     case msg of
         NoOp ->
             model ! []
+
+        FetchDataCompleted result ->
+            case result of
+                Ok { records, entries, maxPage } ->
+                    let
+                        filters_ =
+                            { filters | maxPage = maxPage }
+                    in
+                        { model
+                            | allRecords = records
+                            , displayRecords = filterRecords filters records
+                            , entries = entries
+                            , filters = filters_
+                        }
+                            ! []
+
+                _ ->
+                    model ! []
 
         UpdatePage pageNumber ->
             model ! []
@@ -132,7 +127,21 @@ update msg model =
             model ! []
 
 
+fetchDataCmd : Cmd Msg
+fetchDataCmd =
+    Http.send FetchDataCompleted (Http.get "data.json" Data.dataDecoder)
 
+
+filterRecords : Filters -> List Data.Record -> List Data.Record
+filterRecords filters records =
+    records
+        |> List.filter (\r -> r.category == filters.category)
+        |> List.filter (\r -> r.firstPage <= filters.limitPage)
+        |> Fuzzy.filter .title (Maybe.withDefault "" filters.text)
+
+
+
+--|> List.sortWith Data.recordOrdering
 -- VIEW
 
 
