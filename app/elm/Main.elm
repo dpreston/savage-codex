@@ -121,7 +121,23 @@ update msg ({ filters } as model) =
             model ! []
 
         UpdateSearch search ->
-            model ! []
+            let
+                search_ =
+                    case String.isEmpty search of
+                        False ->
+                            Just search
+
+                        True ->
+                            Nothing
+
+                filters_ =
+                    { filters | text = search_ }
+            in
+                { model
+                    | filters = filters_
+                    , displayRecords = filterRecords filters_ model.allRecords
+                }
+                    ! []
 
         SelectRecord recordID ->
             model ! []
@@ -189,9 +205,7 @@ stylesheet =
         , style ContentItem
             []
         , style ChapterNumber
-            [ -- border-right 1px
-              -- align right
-              Border.right 1
+            [ Border.right 1
             , Color.border white
             , Font.alignRight
             ]
@@ -248,17 +262,19 @@ pageFilter filters =
         , paddingXY 10 0
         ]
         [ Input.text None
-            []
+            [ padding 10 ]
             { onChange = UpdatePage
             , value = (toString filters.limitPage)
-            , label = Input.hiddenLabel ""
+            , label = Input.hiddenLabel "page slider"
             , options = []
             }
         , Input.text None
-            [ width (px 100) ]
+            [ width (px 100)
+            , padding 10
+            ]
             { onChange = UpdatePage
             , value = (toString filters.limitPage)
-            , label = Input.hiddenLabel ""
+            , label = Input.hiddenLabel "page input"
             , options = []
             }
         ]
@@ -287,11 +303,11 @@ searchFilter filters =
             , width fill
             ]
             { onChange = UpdateSearch
-            , value = "huh"
+            , value = filters.text |> Maybe.withDefault ""
             , label =
                 Input.placeholder
                     { text = "Search"
-                    , label = Input.labelLeft (el None [ verticalCenter ] (text "lable"))
+                    , label = Input.hiddenLabel "search"
                     }
             , options = []
             }
