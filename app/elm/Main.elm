@@ -114,8 +114,21 @@ update msg ({ filters } as model) =
                 _ ->
                     model ! []
 
-        UpdatePage pageNumber ->
-            model ! []
+        UpdatePage page ->
+            let
+                page_ =
+                    page
+                        |> String.toInt
+                        |> Result.withDefault 0
+
+                filters_ =
+                    { filters | limitPage = page_ }
+            in
+                { model
+                    | filters = filters_
+                    , displayRecords = filterRecords filters_ model.allRecords
+                }
+                    ! []
 
         SelectCategory category ->
             model ! []
