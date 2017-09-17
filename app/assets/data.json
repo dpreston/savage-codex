@@ -1,0 +1,22 @@
+{
+    "maxPage" : 247,
+    "records": [
+        {
+            "id": 1,
+            "title": "Rayne",
+            "category": "Character",
+            "firstPage": 1,
+            "lastPage": 1,
+            "entries": []
+        }, 
+        {
+            "id": 2,
+            "title": "Sumila",
+            "category": "Character",
+            "firstPage": 1,
+            "lastPage": 1,
+            "entries": []            
+        }],
+    "entries": [
+    ]
+}
