@@ -161,8 +161,14 @@ update msg ({ filters } as model) =
                 }
                     ! []
 
-        SelectRecord recordID ->
-            model ! []
+        SelectRecord id ->
+            let
+                record =
+                    model.allRecords
+                        |> List.filter (\r -> r.id == id)
+                        |> List.head
+            in
+                { model | currentRecord = record } ! []
 
 
 fetchDataCmd : Cmd Msg
@@ -235,7 +241,9 @@ stylesheet =
         , style SideList
             []
         , style SideItem
-            []
+            [ variation Selected
+                [ Color.background (rgb 240 168 24) ]
+            ]
         , style ContentContainer
             [ Color.background (rgb 48 72 120)
             , Color.text white
@@ -279,7 +287,7 @@ side model =
         , pageFilters model.filters
         , categoryFilter model.filters
         , searchFilter model.filters
-        , itemList model.displayRecords
+        , itemList model.displayRecords model.currentRecord
         ]
 
 
@@ -355,14 +363,25 @@ searchFilter filters =
         ]
 
 
-itemList records =
+itemList records current =
     let
+        currentID =
+            case current of
+                Just r ->
+                    r.id
+
+                Nothing ->
+                    0
+
         record r =
-            el None
-                [ paddingXY 20 10 ]
-                (text r.title)
+            el SideItem
+                [ paddingXY 20 10
+                , vary Selected (r.id == currentID)
+                , onClick (SelectRecord r.id)
+                ]
+                (text (r.title ++ (toString r.id)))
     in
-        column None
+        column SideList
             [ spread ]
             (List.map record records)
 
