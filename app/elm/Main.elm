@@ -379,7 +379,7 @@ itemList records current =
                 , vary Selected (r.id == currentID)
                 , onClick (SelectRecord r.id)
                 ]
-                (text (r.title ++ (toString r.id)))
+                (text r.title)
     in
         column SideList
             [ spread ]
