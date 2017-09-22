@@ -112,6 +112,13 @@ update msg ({ filters } as model) =
                         }
                             ! []
 
+                Err (Http.BadPayload error _) ->
+                    let
+                        _ =
+                            Debug.log error "error"
+                    in
+                        { model | error = error } ! []
+
                 _ ->
                     model ! []
 
@@ -215,7 +222,8 @@ type Variations
 stylesheet : StyleSheet Styles Variations
 stylesheet =
     Style.styleSheet
-        [ style Page
+        [ style None []
+        , style Page
             [ Color.background (rgb 0 0 0)
             , Color.text white
             , Font.typeface [ Font.font "Open Sans", Font.font "sans-serif" ]
@@ -388,14 +396,40 @@ itemList records current =
 
 content model =
     let
-        contentList =
+        maybeToBool attr =
+            case attr of
+                Just _ ->
+                    True
+
+                Nothing ->
+                    False
+
+        record_ =
+            case model.currentRecord of
+                Just r ->
+                    r
+
+                Nothing ->
+                    Data.emptyRecord
+
+        displayEntries record =
+            record.entries
+                |> List.filter (\e -> e.chapter <= model.filters.limitPage)
+                |> List.sortBy .chapter
+
+        displaySummary entries =
+            entries
+                |> List.filter (\e -> maybeToBool e.summary)
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault Data.emptyEntry
+                |> .summary
+                |> Maybe.withDefault "huh?"
+
+        contentList entries =
             column ContentList
                 []
-                [ contentItem "one"
-                , contentItem "two"
-                , contentItem "three"
-                , contentItem "four"
-                ]
+                (List.map contentItem entries)
 
         contentItem i =
             row ContentItem
@@ -407,8 +441,8 @@ content model =
                     [ width (px 60)
                     , paddingRight 10
                     ]
-                    (text "999")
-                , el None [] (text i)
+                    (text (toString i.chapter))
+                , el None [] (text i.text)
                 ]
     in
         column ContentContainer
@@ -417,9 +451,9 @@ content model =
             ]
             [ el Header
                 [ paddingXY 20 10 ]
-                (text "Nothing here yet")
+                (text record_.title)
             , el ContentSummary
                 [ paddingXY 20 10 ]
-                (text "No Summary")
-            , contentList
+                (text (displaySummary (displayEntries record_)))
+            , contentList (displayEntries record_)
             ]

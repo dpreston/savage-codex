@@ -37,6 +37,20 @@ type alias JsonRoot =
 
 
 
+--
+
+
+emptyRecord : Record
+emptyRecord =
+    Record 0 Invalid "no record" 1 []
+
+
+emptyEntry : Entry
+emptyEntry =
+    Entry 0 0 0 "no entry" Nothing
+
+
+
 -- JSON Decoders
 
 

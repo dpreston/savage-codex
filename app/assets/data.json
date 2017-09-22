@@ -1,22 +1,65 @@
 {
-    "maxPage" : 247,
-    "records": [
+  "maxPage": 3,
+  "records": [
+    {
+      "id": 1,
+      "title": "Rayne",
+      "category": "Character",
+      "firstPage": 1,
+      "lastPage": 3,
+      "entries": [
         {
-            "id": 1,
-            "title": "Rayne",
-            "category": "Character",
-            "firstPage": 1,
-            "lastPage": 1,
-            "entries": []
+          "id": 1,
+          "recordID": 1,
+          "page": 1,
+          "text": "first chapter",
+          "summary": "first summary"
         }, 
         {
-            "id": 2,
-            "title": "Sumila",
-            "category": "Character",
-            "firstPage": 1,
-            "lastPage": 1,
-            "entries": []            
-        }],
-    "entries": [
-    ]
+          "id": 2,
+          "recordID": 1,
+          "page": 2,
+          "text": "second chapter",
+          "summary": "second summary"
+        }, 
+        {
+          "id": 3,
+          "recordID": 1,
+          "page": 3,
+          "text": "third chapter",
+          "summary": "third summary"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Sumila",
+      "category": "Character",
+      "firstPage": 1,
+      "lastPage": 3,
+      "entries": [
+        {
+          "id": 1,
+          "recordID": 2,
+          "page": 1,
+          "text": "first chapter",
+          "summary": "first summary"
+        },
+        {
+          "id": 2,
+          "recordID": 2,
+          "page": 2,
+          "text": "second chapter",
+          "summary": "second summary"
+        },
+        {
+          "id": 3,
+          "recordID": 2,
+          "page": 3,
+          "text": "third chapter",
+          "summary": "third summary"
+        }]
+    }
+  ],
+  "entries": []
 }
