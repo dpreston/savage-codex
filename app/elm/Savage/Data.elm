@@ -1,4 +1,13 @@
-module Savage.Data exposing (..)
+module Savage.Data
+    exposing
+        ( JsonRoot
+        , Record
+        , Entry
+        , Category(..)
+        , emptyRecord
+        , emptyEntry
+        , dataDecoder
+        )
 
 import Json.Decode as JD exposing (Decoder)
 import Json.Decode.Pipeline as JP
