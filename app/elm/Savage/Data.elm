@@ -15,14 +15,13 @@ type alias Record =
     { id : Int
     , category : Category
     , title : String
-    , firstPage : Int
+    , firstChapter : Int
     , entries : List Entry
     }
 
 
 type alias Entry =
     { id : Int
-    , recordID : Int
     , chapter : Int
     , text : String
     , summary : Maybe String
@@ -31,8 +30,7 @@ type alias Entry =
 
 type alias JsonRoot =
     { records : List Record
-    , entries : List Entry
-    , maxPage : Int
+    , maxChapter : Int
     }
 
 
@@ -47,7 +45,7 @@ emptyRecord =
 
 emptyEntry : Entry
 emptyEntry =
-    Entry 0 0 0 "no entry" Nothing
+    Entry 0 0 "no entry" Nothing
 
 
 
@@ -58,8 +56,7 @@ dataDecoder : Decoder JsonRoot
 dataDecoder =
     JP.decode JsonRoot
         |> JP.required "records" (JD.list recordDecoder)
-        |> JP.required "entries" (JD.list entryDecoder)
-        |> JP.required "maxPage" JD.int
+        |> JP.required "maxChapter" JD.int
 
 
 recordDecoder : Decoder Record
@@ -68,7 +65,7 @@ recordDecoder =
         |> JP.required "id" JD.int
         |> JP.required "category" (JD.string |> JD.andThen categoryDecoder)
         |> JP.required "title" JD.string
-        |> JP.required "firstPage" JD.int
+        |> JP.required "firstChapter" JD.int
         |> JP.required "entries" (JD.list entryDecoder)
 
 
@@ -76,8 +73,7 @@ entryDecoder : Decoder Entry
 entryDecoder =
     JP.decode Entry
         |> JP.required "id" JD.int
-        |> JP.required "recordID" JD.int
-        |> JP.required "page" JD.int
+        |> JP.required "chapter" JD.int
         |> JP.required "text" JD.string
         |> JP.optional "summary" (JD.nullable JD.string) Nothing
 

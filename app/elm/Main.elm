@@ -37,14 +37,12 @@ type alias Model =
     , displayRecords : List Data.Record
     , currentRecord : Maybe Data.Record
     , filters : Filters
-    , error : String
-    , entries : List Data.Entry
     }
 
 
 type alias Filters =
-    { limitPage : Int
-    , maxPage : Int
+    { limitChapter : Int
+    , maxChapter : Int
     , category : Data.Category
     , text : Maybe String
     }
@@ -56,20 +54,11 @@ model =
     , displayRecords = []
     , currentRecord = Nothing
     , filters =
-        { limitPage = 1
-        , maxPage = 1
+        { limitChapter = 1
+        , maxChapter = 1
         , category = Data.Character
         , text = Nothing
         }
-    , entries =
-        [ { id = 1
-          , recordID = 1
-          , chapter = 1
-          , text = "Rayne awakes in the slave camp"
-          , summary = Nothing
-          }
-        ]
-    , error = "No Errors"
     }
 
 
@@ -85,7 +74,7 @@ init =
 type Msg
     = NoOp
     | FetchDataCompleted (Result Http.Error Data.JsonRoot)
-    | UpdatePage String
+    | UpdateChapter String
     | SelectCategory Data.Category
     | UpdateSearch String
     | SelectRecord Int
@@ -99,15 +88,14 @@ update msg ({ filters } as model) =
 
         FetchDataCompleted result ->
             case result of
-                Ok { records, entries, maxPage } ->
+                Ok { records, maxChapter } ->
                     let
                         filters_ =
-                            { filters | maxPage = maxPage }
+                            { filters | maxChapter = maxChapter }
                     in
                         { model
                             | allRecords = records
                             , displayRecords = filterRecords filters records
-                            , entries = entries
                             , filters = filters_
                         }
                             ! []
@@ -117,20 +105,20 @@ update msg ({ filters } as model) =
                         _ =
                             Debug.log error "error"
                     in
-                        { model | error = error } ! []
+                        model ! []
 
                 _ ->
                     model ! []
 
-        UpdatePage page ->
+        UpdateChapter chapter ->
             let
-                page_ =
-                    page
+                chapter_ =
+                    chapter
                         |> String.toInt
                         |> Result.withDefault 0
 
                 filters_ =
-                    { filters | limitPage = page_ }
+                    { filters | limitChapter = chapter_ }
             in
                 { model
                     | filters = filters_
@@ -187,7 +175,7 @@ filterRecords : Filters -> List Data.Record -> List Data.Record
 filterRecords filters records =
     records
         |> List.filter (\r -> r.category == filters.category)
-        |> List.filter (\r -> r.firstPage <= filters.limitPage)
+        |> List.filter (\r -> r.firstChapter <= filters.limitChapter)
         |> Fuzzy.filter .title (Maybe.withDefault "" filters.text)
 
 
@@ -306,8 +294,8 @@ pageFilters filters =
         ]
         [ Input.text None
             [ padding 10 ]
-            { onChange = UpdatePage
-            , value = (toString filters.limitPage)
+            { onChange = UpdateChapter
+            , value = (toString filters.limitChapter)
             , label = Input.hiddenLabel "page slider"
             , options = []
             }
@@ -315,8 +303,8 @@ pageFilters filters =
             [ width (px 100)
             , padding 10
             ]
-            { onChange = UpdatePage
-            , value = (toString filters.limitPage)
+            { onChange = UpdateChapter
+            , value = (toString filters.limitChapter)
             , label = Input.hiddenLabel "page input"
             , options = []
             }
@@ -414,7 +402,7 @@ content model =
 
         displayEntries record =
             record.entries
-                |> List.filter (\e -> e.chapter <= model.filters.limitPage)
+                |> List.filter (\e -> e.chapter <= model.filters.limitChapter)
                 |> List.sortBy .chapter
 
         displaySummary entries =
