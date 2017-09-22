@@ -12,6 +12,7 @@ import Style.Font as Font
 import Style.Border as Border
 import Color exposing (..)
 import Simple.Fuzzy as Fuzzy
+import Maybe.Extra exposing (isJust)
 
 
 --
@@ -384,21 +385,9 @@ itemList records current =
 
 content model =
     let
-        maybeToBool attr =
-            case attr of
-                Just _ ->
-                    True
-
-                Nothing ->
-                    False
-
         record_ =
-            case model.currentRecord of
-                Just r ->
-                    r
-
-                Nothing ->
-                    Data.emptyRecord
+            model.currentRecord
+                |> Maybe.withDefault Data.emptyRecord
 
         displayEntries record =
             record.entries
@@ -407,7 +396,7 @@ content model =
 
         displaySummary entries =
             entries
-                |> List.filter (\e -> maybeToBool e.summary)
+                |> List.filter (\e -> isJust e.summary)
                 |> List.reverse
                 |> List.head
                 |> Maybe.withDefault Data.emptyEntry
